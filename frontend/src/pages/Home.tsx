@@ -30,6 +30,8 @@ const Home = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [forecast, setForecast] = useState<ForecastData | null>(null);
   const [location, setLocation] = useState<string>("");
+  const [currentTime, setCurrentTime] = useState<string>("");
+  const [userTimezone, setUserTimezone] = useState<string>("Asia/Manila"); // default fallback
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -41,16 +43,16 @@ const Home = () => {
         const response = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
         );
-        if (!response.ok) {
-          throw new Error("Network error");
-        }
         const data = await response.json();
         setWeather(data);
+
         const forecastResponse = await fetch(
           `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
         );
         const forecastData = await forecastResponse.json();
         setForecast(forecastData);
+
+        await getUserTimezone(lat, lon); // ← Get timezone here too
       } catch (error) {
         setError(error instanceof Error ? error.message : String(error));
       } finally {
@@ -65,18 +67,43 @@ const Home = () => {
           const lon = position.coords.longitude;
           fetchWeather(lat, lon);
         },
-        (error) => {
-          console.warn("Geolocation error:", error.message);
-          //manila if failed
+        () => {
+          // fallback to Manila
           fetchWeather(14.5995, 120.9842);
+          getUserTimezone(14.5995, 120.9842);
         }
       );
-    } else {
-      console.warn("Geolocation is not supported by this browser.");
-      //manila if failed
-      fetchWeather(14.5995, 120.9842);
     }
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const formatted = new Intl.DateTimeFormat("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+        timeZone: userTimezone,
+      }).format(now);
+      setCurrentTime(formatted);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [userTimezone]);
+
+  const getUserTimezone = async (lat: number, lon: number) => {
+    try {
+      const apiKey = import.meta.env.VITE_TIMEZONEDB_API_KEY;
+      const response = await fetch(
+        `https://api.timezonedb.com/v2.1/get-time-zone?key=${apiKey}&format=json&by=position&lat=${lat}&lng=${lon}`
+      );
+      const data = await response.json();
+      setUserTimezone(data.zoneName);
+    } catch (error) {
+      console.error("Failed to fetch timezone:", error);
+    }
+  };
 
   const groupForecastByDay = () => {
     if (!forecast) return [];
@@ -193,7 +220,7 @@ const Home = () => {
                 <div className="flex justify-between mb-4 text-sm md:text-base">
                   <p className="text-gray-600">{weather?.name || "Location"}</p>
                   <p className="text-gray-600">
-                    {new Date().toLocaleDateString()}
+                    {new Date().toLocaleDateString("en-US")}
                   </p>
                 </div>
 
@@ -248,11 +275,8 @@ const Home = () => {
             {/* Right section */}
             <div className="flex-[1] md:pl-6 flex flex-col justify-between">
               <div>
-                <p className="text-xl sm:text-2xl text-gray-800 font-bold">
-                  {new Date().toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                <p className="text-gray-600">
+                  Current Time: {currentTime} ({userTimezone})
                 </p>
               </div>
 
