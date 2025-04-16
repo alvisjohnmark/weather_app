@@ -51,10 +51,15 @@ app.get("/api/place/details", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+//ping
+app.get("/api/ping", (req, res) => {
+  res.status(200).send("ping");
+});
+
 
 cron.schedule("*/14 * * * *", async () => {
   try {
-    const res = await fetch("https://weather-app-ni-jm.onrender.com"); 
+    const res = await fetch("https://weather-app-ni-jm.onrender.com/api/ping"); 
     console.log("Pinged backend:", res.status);
   } catch (error) {
     console.error("Error pinging backend:", error);

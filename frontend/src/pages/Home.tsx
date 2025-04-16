@@ -38,7 +38,6 @@ const Home = () => {
     const fetchWeather = async (lat: number, lon: number) => {
       try {
         const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
-
         const response = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
         );
@@ -47,7 +46,6 @@ const Home = () => {
         }
         const data = await response.json();
         setWeather(data);
-
         const forecastResponse = await fetch(
           `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
         );
@@ -107,13 +105,11 @@ const Home = () => {
   const suggestionInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value;
     setLocation(input);
-
     if (input.length > 2) {
       try {
         const response = await fetch(
           `https://weather-app-ni-jm.onrender.com/api/autocomplete?input=${input}`
         );
-
         const data = await response.json();
         setSuggestions(data.predictions || []);
       } catch (error) {
