@@ -52,7 +52,7 @@ const Home = () => {
         const forecastData = await forecastResponse.json();
         setForecast(forecastData);
 
-        await getUserTimezone(lat, lon); // ← Get timezone here too
+        await getUserTimezone(lat, lon); 
       } catch (error) {
         setError(error instanceof Error ? error.message : String(error));
       } finally {
