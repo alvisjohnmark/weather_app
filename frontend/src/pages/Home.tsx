@@ -111,7 +111,7 @@ const Home = () => {
     if (input.length > 2) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/autocomplete?input=${input}`
+          `https://weather-app-ni-jm.onrender.com/api/autocomplete?input=${input}`
         );
 
         const data = await response.json();
@@ -130,7 +130,7 @@ const Home = () => {
     try {
       const weatherApiKey = import.meta.env.VITE_WEATHER_API_KEY;
       const response = await fetch(
-        `http://localhost:5000/api/place/details?input=${input}`
+        `https://weather-app-ni-jm.onrender.com/api/place/details?input=${input}`
       );
       if (!response.ok) {
         throw new Error("Network error");
