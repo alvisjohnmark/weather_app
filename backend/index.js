@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
+import cron from "node-cron";
 
 const app = express();
 dotenv.config();
@@ -50,6 +51,16 @@ app.get("/api/place/details", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+cron.schedule("*/14 * * * *", async () => {
+  try {
+    const res = await fetch("https://weather-app-ni-jm.onrender.com"); 
+    console.log("Pinged backend:", res.status);
+  } catch (error) {
+    console.error("Error pinging backend:", error);
+  }
+});
+
 app.listen(5000, () => {
   console.log("Server running");
 });
